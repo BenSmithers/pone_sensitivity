@@ -1,0 +1,9 @@
+Update the daemonflux gradients to be calculated at-icecube
+
+Check the reconstruction smears things out appropriately 
+Check a few of the signal strengths (appearance plots) in reconstructed space
+Add in astrophysical nuisance parameters
+Find some approximation for detector uncertainties 
+
+Write code to save the fit results
+Write code to load fit results and generate a contour

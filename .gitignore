@@ -3,6 +3,13 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+h5_data/*
+resources/*.hdf5
+resources/*.pickle
+surface_fluxes/*
+out/*
+plotting/plots/*
+
 # C extensions
 *.so
 
