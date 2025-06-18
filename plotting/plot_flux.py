@@ -134,11 +134,11 @@ def main(flux:str, baseline="", disappear=False):
             flux_dict[key][mask] = flux_dict[key][mask] / interp_data[key][mask] 
             flux_dict[key][np.logical_not(mask)] = 0     
             print("{} - {} to {}".format(key, np.min(flux_dict[key]), np.max(flux_dict[key])))
-            vmin = 0.95
+            vmin = 0.90
             cmap = "RdBu"
 
         
-        vmax = 1.05
+        vmax = 1.10
         
         cbar_label="log(Ratio)"
     else:
@@ -149,9 +149,8 @@ def main(flux:str, baseline="", disappear=False):
         for key in flux_dict.keys():
             if key in skip_keys:
                 continue
-            continue
             flux_dict[key][flux_dict[key]<0] = 0.0
-            flux_dict[key][flux_dict[key]!=0] = flux_dict[key][flux_dict[key]!=0]
+            flux_dict[key][flux_dict[key]!=0] = np.log10(flux_dict[key][flux_dict[key]!=0])
 
     for key in flux_dict.keys():
         if key in skip_keys:
@@ -174,7 +173,7 @@ def main(flux:str, baseline="", disappear=False):
         axes.set_ylabel(r"Energy [GeV]", size=10)
         axes.set_title("{}".format(key), size=10)
         axes.set_xlim([-1,0])
-        axes.set_ylim([1e2, 1e8])
+        #axes.set_ylim([1e2, 1e8])
         fig.add_subplot(axes)
 
         count += 1
