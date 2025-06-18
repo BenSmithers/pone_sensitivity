@@ -17,7 +17,7 @@ def make2Dmap(fname, particle, vegrid, vparams={}):
     
     # Point to the files
     #quickflux = Flux('./daemonsplines_IceCube_20230207.pkl', cal_file='./prd22_daemon_v3.pkl', use_calibration=True)
-    quickflux = Flux(location="IceCube", use_calibration=True)
+    quickflux = Flux(location="generic", use_calibration=True)
 
     icangles = list(quickflux.zenith_angles)
     
@@ -25,13 +25,14 @@ def make2Dmap(fname, particle, vegrid, vparams={}):
     icangles_array = np.array(icangles, dtype=float)
     mysort = icangles_array.argsort()
     icangles = np.array(icangles)[mysort][::-1]
+    icangles = icangles.astype(float)
 
     flux_ref = np.zeros([len(vegrid), len(icangles)])
 
     costheta_angles = np.zeros(len(icangles))
 
     for index in range(len(icangles)):
-        costheta = np.cos(np.deg2rad(np.float(icangles[index])))
+        costheta = np.cos(np.deg2rad(icangles[index]))
         costheta_angles[index] = costheta
         if fname=='conv' : 
             flux_ref[:,index] = quickflux.flux(vegrid, icangles[index], particle, params=vparams)

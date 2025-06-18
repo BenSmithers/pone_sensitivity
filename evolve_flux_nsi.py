@@ -10,7 +10,7 @@ The output is saved to an hdf5 file
 """
 
 
-def main(infile, mutau_real, mutau_imag, prompt):
+def main(infile, mutau_real, mutau_imag, prompt, force=False):
 
     print("Evolving Flux with")
     print(    "mutau_real {}".format(mutau_real))
@@ -48,7 +48,7 @@ def main(infile, mutau_real, mutau_imag, prompt):
     filename_root = ".".join(os.path.split(infile)[-1].split(".")[:-1]) + ".hdf5"
     root_folder = utils.make_root(fc)
     outfile_name = utils.get_filename(root_folder, filename_root, these_params)
-    if os.path.exists(outfile_name):
+    if os.path.exists(outfile_name) and not force:
         print("Done already")
         return
 
@@ -63,16 +63,11 @@ def main(infile, mutau_real, mutau_imag, prompt):
 
     n_nu = 3
 
-    if ISSPECIAL:
-        n_e = 350
-        n_z = 100
-        inistate = np.zeros(shape=(n_z, n_e, 2, n_nu ))
-        node_e =np.logspace(2, 8, n_e)*1e9
-        node_czth = np.linspace(-1,1, n_z)
-    else:
-        n_e = len(energy_nodes)
-        n_z = len(costh_nodes)
-        inistate = np.zeros(shape=(len(costh_nodes), len(energy_nodes), 2, n_nu ))
+    n_e = 500
+    n_z = 100
+    inistate = np.zeros(shape=(n_z, n_e, 2, n_nu ))
+    node_e =np.logspace(2, 6, n_e)*1e9
+    node_czth = np.linspace(-1,1, n_z)
 
     for i_flav in range(n_nu):
         for j_nu in range(2):
@@ -104,27 +99,20 @@ def main(infile, mutau_real, mutau_imag, prompt):
                 #continue # don't try to get conventional taus 
             _rawflux =  np.array(parsed_data[key][:])
 
-            if ISSPECIAL:
-                double_spline = RectBivariateSpline(costh_nodes, energy_nodes, _rawflux)
-                flux = double_spline(node_czth, node_e)
-
-            else:
-                flux = _rawflux
-
+            double_spline = RectBivariateSpline(costh_nodes, energy_nodes, _rawflux)
+            flux = double_spline(node_czth, node_e)
 
             for czi in range(n_z):
                 for ei in range(n_e):
                     inistate[czi][ei][j_nu][i_flav] += flux[czi][ei]
 
 
-    use_earth_interactions = False
+    use_earth_interactions = True
     use_oscillations = True
-    if ISSPECIAL:
-        nus_atm =  nsq.nuSQUIDSNSI(node_czth, 0.0, node_e, n_nu, nsq.NeutrinoType.both, use_earth_interactions,
-                                0.5836, 0.1495, 0.8587)
-    else:
-        nus_atm =  nsq.nuSQUIDSNSI(costh_nodes,0.0, energy_nodes, n_nu, nsq.NeutrinoType.both, use_earth_interactions,
-                                0.5836, 0.1495, 0.8587)
+
+    nus_atm =  nsq.nuSQUIDSNSI(node_czth, 0.0, node_e, n_nu, nsq.NeutrinoType.both, use_earth_interactions,
+                            0.5836, 0.1495, 0.8587)
+
     xs = nsq.loadDefaultCrossSections()
     nus_atm.SetNeutrinoCrossSections(xs)
 
@@ -150,7 +138,7 @@ def main(infile, mutau_real, mutau_imag, prompt):
     print("using tolerance {}".format(tolerance))
 
     nus_atm.Set_abs_error(tolerance)
-    nus_atm.Set_ProgressBar(False)
+    nus_atm.Set_ProgressBar(True)
 
     nus_atm.Set_IncludeOscillations(True)
     from copy import copy
@@ -161,12 +149,8 @@ def main(infile, mutau_real, mutau_imag, prompt):
     n_energy = 600
     n_angle = 200
 
-    if ISSPECIAL:
-        min_e = log10(min(node_e))*1.01
-        max_e = log10(max(node_e))*0.99
-    else:    
-        min_e = log10(min(energy_nodes))*1.01
-        max_e = log10(max(energy_nodes))*0.99
+    min_e = log10(min(node_e))*1.01
+    max_e = log10(max(node_e))*0.99
 
     new_energies = np.logspace(min_e, max_e, n_energy)
     new_zeniths = np.linspace(-1,1,n_angle)
@@ -177,8 +161,7 @@ def main(infile, mutau_real, mutau_imag, prompt):
     outflux["costh_nodes"] = new_zeniths
 
     def flat_zen(zenith):
-        if not ISSPECIAL:
-            return zenith
+
         zen = zenith
         if zenith<-0.9875:
             zen = -0.9875
@@ -248,4 +231,4 @@ if __name__=="__main__":
 
     prompt      = args.prompt
 
-    main(infile, mutau_real, mutau_imag, prompt)
+    main(infile, mutau_real, mutau_imag, prompt, True)

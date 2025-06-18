@@ -111,10 +111,10 @@ else:
     n_nu = 4
 
 if ISSPECIAL:
-    n_e = 350
+    n_e = 500
     n_z = 100
     inistate = np.zeros(shape=(n_z, n_e, 2, n_nu ))
-    node_e =np.logspace(2, 8, n_e)*1e9
+    node_e =np.logspace(2, 6, n_e)*1e9
     node_czth = np.linspace(-1,1, n_z)
 else:
     n_e = len(energy_nodes)
@@ -272,3 +272,4 @@ _obj = h5.File(outfile_name, "w")
 for key in outflux.keys():
     _obj.create_dataset(key, data=outflux[key])
 _obj.close()
+print("Saved {}".format(outfile_name))
