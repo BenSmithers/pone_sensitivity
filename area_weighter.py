@@ -15,9 +15,6 @@ from scipy.integrate import dblquad
 
 from math import pi
 
-FLUX_DIR = os.path.join(os.path.dirname(__file__), "out")
-
-
 particle_list = [
             'nue',   'antinue',
             'numu',   'antinumu',
@@ -33,6 +30,8 @@ def check_load(param:utils.Param, prompt=False):
     """
     root_folder = utils.make_root(utils.FILECLASS.PROMPT if prompt else utils.FILECLASS.CONV)
     conv_outfile_name = utils.get_filename(root_folder, "daemon_{}_bestfit.hdf5".format("pr" if prompt else "conv"), param)
+    print("Checking stuff", utils.__file__)
+    print(conv_outfile_name)
     if not os.path.exists(conv_outfile_name):        
         if isinstance(param, utils.NSIParam):
             from pone_newphs.evolve_flux_nsi import main as evolve_flux
@@ -40,6 +39,18 @@ def check_load(param:utils.Param, prompt=False):
                         param.mutau_real,
                         param.mutau_imag,
                         prompt) 
+        elif isinstance(param, utils.SterileParam):
+            from pone_newphs.evolve_flux_sterile import main as evolve_flux
+            evolve_flux(
+                os.path.join(os.path.dirname(__file__),"surface_fluxes","daemon_{}_bestfit.h5".format("pr" if prompt else "conv")),
+                param.deltam,
+                param.theta14,
+                param.theta24, 
+                param.theta34, 
+                param.deltacp41, 
+                param.deltacp42, 
+                prompt
+            )
         else: 
 
             raise NotImplementedError
